@@ -368,7 +368,7 @@ static void MX_GPIO_Init(void)
   //ÖÐ¶ÏÅäÖÃ(PF10 --> PC10)
 
   /*Configure GPIO pin : PC10 */
-  GPIO_Initure.Pin = GPIO_PIN_10 | GPIO_PIN_11;   /* key1_n */
+  GPIO_Initure.Pin = GPIO_PIN_10;   /* key1_n */
   GPIO_Initure.Mode = GPIO_MODE_IT_RISING;
   GPIO_Initure.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_Initure);

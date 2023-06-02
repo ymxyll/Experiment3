@@ -134,8 +134,6 @@ int main(void)
         printf("sw8 open...\n");
         HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_7);
       }
-      else
-        HAL_GPIO_WritePin(GPIOF, GPIO_PIN_7, GPIO_PIN_RESET);
       
       HAL_Delay(500);
       HAL_GPIO_WritePin(GPIOF, GPIO_PIN_4, GPIO_PIN_RESET);
@@ -153,8 +151,7 @@ int main(void)
       //查看send是否想要连接，想要连接就闪灯led8
       if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_8) == GPIO_PIN_SET)
         HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_7);
-      else
-        HAL_GPIO_WritePin(GPIOF, GPIO_PIN_7, GPIO_PIN_RESET);
+
 
       HAL_Delay(500);
       HAL_GPIO_WritePin(GPIOF, GPIO_PIN_6, GPIO_PIN_RESET);
@@ -168,40 +165,28 @@ int main(void)
       
       i++;
     }
-    else if(i == 20)
-    {
-      //没ready就继续跑主程序
-      if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_8) == GPIO_PIN_RESET)
-      {
-        i = 0;
-      }
-      else
-        i += 1;
-    }
     else
     {//主程序执行结束
       while(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_8) == GPIO_PIN_RESET);
+
+      //发送握手信号回去
+      HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_SET);
+      printf("connected... \n 9 set ack back...\n");
 
       //亮灯led8表示处于传输状态
       HAL_GPIO_WritePin(GPIOF, GPIO_PIN_7, GPIO_PIN_SET);
 
 
       //control led
-      HAL_GPIO_WritePin(GPIOF, GPIO_PIN_0, HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0));
-      HAL_GPIO_WritePin(GPIOF, GPIO_PIN_1, HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1));
-      HAL_GPIO_WritePin(GPIOF, GPIO_PIN_2, HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_2));
-      HAL_GPIO_WritePin(GPIOF, GPIO_PIN_3, HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_3));
-      printf("ack message... \nsend ack 0 back... \n");
-
-
-      //发送ack=1信号回去
-      HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_SET);
-      printf("connected... \nset ack back...\n");
-
-      // set ack 0;
+      while(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_8) == GPIO_PIN_SET)
+      {
+        HAL_GPIO_WritePin(GPIOF, GPIO_PIN_0, HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0));
+        HAL_GPIO_WritePin(GPIOF, GPIO_PIN_1, HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1));
+        HAL_GPIO_WritePin(GPIOF, GPIO_PIN_2, HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_2));
+        HAL_GPIO_WritePin(GPIOF, GPIO_PIN_3, HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_3));
+      }
+      printf("sw8 close, connect close... \n");
       HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_RESET);
-
-      printf("set ack 0 back... \n");
       //关闭led8表示未进行传输
       HAL_GPIO_WritePin(GPIOF, GPIO_PIN_7, GPIO_PIN_RESET);
       i = 0;//继续执行主程序
@@ -362,19 +347,19 @@ static void MX_GPIO_Init(void)
   GPIO_Initure.Pull = GPIO_NOPULL;
   GPIO_Initure.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_Initure);
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_RESET);
+  // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_RESET);
   
 
-  //中断配置(PF10 --> PC10)
+  //中断配置(要用send板PF没用的引脚)
 
-  /*Configure GPIO pin : PC10 */
-  GPIO_Initure.Pin = GPIO_PIN_10 | GPIO_PIN_11;   /* key1_n */
-  GPIO_Initure.Mode = GPIO_MODE_IT_RISING;
-  GPIO_Initure.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOC, &GPIO_Initure);
+  // /*Configure GPIO pin : PC8 */
+  // GPIO_Initure.Pin = GPIO_PIN_8;   /* key1_n */
+  // GPIO_Initure.Mode = GPIO_MODE_IT_RISING;
+  // GPIO_Initure.Pull = GPIO_NOPULL;
+  // HAL_GPIO_Init(GPIOC, &GPIO_Initure);
 
-  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 5, 0);
-  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+  // HAL_NVIC_SetPriority(EXTI9_5_IRQn, 5, 0);
+  // HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 
 }
 

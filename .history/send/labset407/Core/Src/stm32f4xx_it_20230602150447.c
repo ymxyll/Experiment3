@@ -301,7 +301,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
               //写入b的值到对应引脚上
               HAL_GPIO_WritePin(GPIOF, pin, b);
             }
-            
             // 开启get中断
             HAL_GPIO_WritePin(GPIOF, GPIO_PIN_11, GPIO_PIN_SET);
             printf("a = %d\n", a);

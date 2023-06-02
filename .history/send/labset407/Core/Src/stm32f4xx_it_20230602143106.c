@@ -267,8 +267,8 @@ void EXTI15_10_IRQHandler(void)
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-    int i, j, k;
-
+/*    int i;
+*/
     switch(GPIO_Pin)
     {
         case GPIO_PIN_8:
@@ -276,36 +276,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
           exti = 1;
           break;
         case GPIO_PIN_11:
-          printf("sending numbers... %ld\n\n", HAL_GetTick());
-
-          // counting...
-          int a = 0b00000000;
-          int c;
-          GPIO_PinState b = GPIO_PIN_RESET;
-          uint16_t pin = GPIO_PIN_0;
-          for(i = 0; i < 255; i++)
-          {
-            // 关闭get中断
-            HAL_GPIO_WritePin(GPIOF, GPIO_PIN_11, GPIO_PIN_RESET);
-            a += 1;
-            c = a;
-            for(j = 8; j > 0; j--)
-            {
-              //通过c给b赋值
-              b = (c % 2 == 0) ? GPIO_PIN_RESET : GPIO_PIN_SET;
-              c/=2;
-              
-              //计算要写入的引脚编号
-              pin = GPIO_PIN_0 << j;
-
-              //写入b的值到对应引脚上
-              HAL_GPIO_WritePin(GPIOF, pin, b);
-            }
-            
-            // 开启get中断
-            HAL_GPIO_WritePin(GPIOF, GPIO_PIN_11, GPIO_PIN_SET);
-            printf("a = %d\n", a);
-          }
+          printf("sending ")
     }
 }
 
