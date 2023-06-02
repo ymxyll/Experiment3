@@ -193,7 +193,7 @@ int main(void)
       //读到ready = 1
       while(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_8) == GPIO_PIN_RESET);
 
-      printf("ready... \n\n");
+      printf("PC8 SET...\n\n");
 
       //亮灯led8表示处于传输状态
       HAL_GPIO_WritePin(GPIOF, GPIO_PIN_7, GPIO_PIN_SET);
@@ -211,10 +211,10 @@ int main(void)
           HAL_GPIO_WritePin(GPIOF, pin, HAL_GPIO_ReadPin(GPIOC, pin));   
           a += (HAL_GPIO_ReadPin(GPIOC, pin) == GPIO_PIN_SET) ? 1 : 0;
 
-          // if(HAL_GPIO_ReadPin(GPIOC, pin) == GPIO_PIN_SET)
-          //   printf("high");
-          // else
-          //   printf("low");
+          if(HAL_GPIO_ReadPin(GPIOC, pin) == GPIO_PIN_SET)
+            printf("high");
+          else
+            printf("low");
         }
         printf("a = %d... Time : %ld\n\n", a, HAL_GetTick());
       }

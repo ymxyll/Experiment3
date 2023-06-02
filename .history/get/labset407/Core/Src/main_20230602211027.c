@@ -211,10 +211,10 @@ int main(void)
           HAL_GPIO_WritePin(GPIOF, pin, HAL_GPIO_ReadPin(GPIOC, pin));   
           a += (HAL_GPIO_ReadPin(GPIOC, pin) == GPIO_PIN_SET) ? 1 : 0;
 
-          // if(HAL_GPIO_ReadPin(GPIOC, pin) == GPIO_PIN_SET)
-          //   printf("high");
-          // else
-          //   printf("low");
+          if(HAL_GPIO_ReadPin(GPIOC, pin) == GPIO_PIN_SET)
+            printf("high");
+          else
+            printf("low");
         }
         printf("a = %d... Time : %ld\n\n", a, HAL_GetTick());
       }

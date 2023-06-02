@@ -193,63 +193,31 @@ int main(void)
       //读到ready = 1
       while(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_8) == GPIO_PIN_RESET);
 
-      printf("ready... \n\n");
-
       //亮灯led8表示处于传输状态
       HAL_GPIO_WritePin(GPIOF, GPIO_PIN_7, GPIO_PIN_SET);
 
 
-      if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_11) == GPIO_PIN_SET)
-      {
-        printf("getting numbers...%ld \n", HAL_GetTick());
-        uint16_t pin = GPIO_PIN_0;
-        int a = 0b0;
-        for(i = 0; i < 8; i++)
-        {
-          a = a << 1;
-          pin = GPIO_PIN_0 << i;
-          HAL_GPIO_WritePin(GPIOF, pin, HAL_GPIO_ReadPin(GPIOC, pin));   
-          a += (HAL_GPIO_ReadPin(GPIOC, pin) == GPIO_PIN_SET) ? 1 : 0;
-
-          // if(HAL_GPIO_ReadPin(GPIOC, pin) == GPIO_PIN_SET)
-          //   printf("high");
-          // else
-          //   printf("low");
-        }
-        printf("a = %d... Time : %ld\n\n", a, HAL_GetTick());
-      }
-      else
-      {
-        //control led
-        HAL_GPIO_WritePin(GPIOF, GPIO_PIN_0, HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0));
-        HAL_GPIO_WritePin(GPIOF, GPIO_PIN_1, HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1));
-        HAL_GPIO_WritePin(GPIOF, GPIO_PIN_2, HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_2));
-        HAL_GPIO_WritePin(GPIOF, GPIO_PIN_3, HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_3));
-      }
-
-
-
-
-      // printf("getting message... \n");
+      //control led
+      HAL_GPIO_WritePin(GPIOF, GPIO_PIN_0, HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0));
+      HAL_GPIO_WritePin(GPIOF, GPIO_PIN_1, HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1));
+      HAL_GPIO_WritePin(GPIOF, GPIO_PIN_2, HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_2));
+      HAL_GPIO_WritePin(GPIOF, GPIO_PIN_3, HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_3));
+      printf("getting message... \nsend ack 0 back... \n");
 
 
       //发送ack=1信号回去
       HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_SET);
-      // printf("connected... \nset ack back...\n");
-
-
-
+      printf("connected... \nset ack back...\n");
 
       //读到ready = 0时
       while(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_8) == GPIO_PIN_SET);
-      printf("get ready = 0... \n");
       // set ack 0;
       HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_RESET);
 
       printf("set ack 0 and send back... \n");
       //关闭led8表示未进行传输
       HAL_GPIO_WritePin(GPIOF, GPIO_PIN_7, GPIO_PIN_RESET);
-      // i = 0;//继续执行主程序
+      i = 0;//继续执行主程序
     //}
 
   }
@@ -413,7 +381,7 @@ static void MX_GPIO_Init(void)
   //中断配置(PF10 --> PC10)
 
   /*Configure GPIO pin : PC10 */
-  GPIO_Initure.Pin = GPIO_PIN_10;   /* key1_n */
+  GPIO_Initure.Pin = GPIO_PIN_10 | GPIO_PIN_11;   /* key1_n */
   GPIO_Initure.Mode = GPIO_MODE_IT_RISING;
   GPIO_Initure.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_Initure);
