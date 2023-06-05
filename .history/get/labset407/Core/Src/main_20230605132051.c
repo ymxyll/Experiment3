@@ -115,6 +115,7 @@ int main(void)
       //读到ready = 1
       while(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_8) == GPIO_PIN_RESET);
 
+      // printf("ready... \n\n");
 
       //亮灯led8表示处于传输状态
       HAL_GPIO_WritePin(GPIOF, GPIO_PIN_7, GPIO_PIN_SET);
@@ -333,13 +334,25 @@ static void MX_GPIO_Init(void)
   GPIO_Initure.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_Initure);
 
-  /*Configure GPIO pins output pc : PC9(查询ack) */
-  GPIO_Initure.Pin = GPIO_PIN_9;
+  /*Configure GPIO pins output pc : PC9(查询ack) PC12(中断ack) */
+  GPIO_Initure.Pin = GPIO_PIN_9 | GPIO_PIN_12;
   GPIO_Initure.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_Initure.Pull = GPIO_NOPULL;
   GPIO_Initure.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_Initure);
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_RESET);
+  
+
+  //中断配置(PF10 --> PC10)
+
+  /*Configure GPIO pin : PC10 */
+  GPIO_Initure.Pin = GPIO_PIN_10;   /* key1_n */
+  GPIO_Initure.Mode = GPIO_MODE_IT_RISING;
+  GPIO_Initure.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOC, &GPIO_Initure);
+
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 }
 

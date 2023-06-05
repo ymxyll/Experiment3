@@ -44,7 +44,8 @@ UART_HandleTypeDef huart1;
 TIM_HandleTypeDef htim6;
 
 /* USER CODE BEGIN PV */
-int i_flash;
+int exti;
+int count;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -74,7 +75,8 @@ int _write(int fd, char* ptr, int len) {
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  int i = 0;
+
+
 
   /* USER CODE END 1 */
 
@@ -112,78 +114,168 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-      //读到ready = 1
-      while(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_8) == GPIO_PIN_RESET);
 
+    
+    //ready 置0, 中断标志exti置0
+    HAL_GPIO_WritePin(GPIOF, GPIO_PIN_8, GPIO_PIN_RESET);
+    exti = 0;
+    count = 0;
 
-      //亮灯led8表示处于传输状态
-      HAL_GPIO_WritePin(GPIOF, GPIO_PIN_7, GPIO_PIN_SET);
+    //设置要传输的数据(sw8电平变化即代表设置完成), 并准备读取ready信号
+    GPIO_PinState last_state = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_7);
+    while(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_7) == last_state || exti == 0)
+    {
 
+      // if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_7) == GPIO_PIN_SET)
+      // {
+      //   printf("sw8 open!\n");
+      // }
 
-      if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_11) == GPIO_PIN_SET)
+      //开始计算速率
+      if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_4) == GPIO_PIN_SET)
       {
-        // printf("getting numbers...%ld \n", HAL_GetTick());
+        HAL_GPIO_WritePin(GPIOF, GPIO_PIN_11, GPIO_PIN_SET);
+        if(count == 1)
+        {
+          // counting...
+          int a = 0b00000000;
+          int i = 0, j = 0, k = 0;
+          int c;
+          GPIO_PinState b = GPIO_PIN_RESET;
+          uint16_t pin = GPIO_PIN_0;
+          long int start = HAL_GetTick();
+          printf("sending numbers... %ld\n\n", start);
+          for(k = 0; k < 7874; k++)
+          {
+            for(i = 0; i < 127; i++)
+            {
+              a += 1;
+              c = a;
+
+              // 将 a 的低7位写入 GPIOC 的 ODR 寄存器
+              GPIOC->ODR = (GPIOC->ODR & 0xFF80) | (a & 0x7F);
 
 
-        // 将 GPIOC0 到 GPIOC6 的 7 位数据读出
-        uint8_t input_data = (uint8_t)GPIOC->IDR & 0x7F;
-        // 将读取到的 7 位数据写入到 GPIOF0 到 GPIOF6 的输出寄存器中
-        GPIOF->ODR = (GPIOF->ODR & 0xFF80) | input_data;
+              // for(j = 7; j > 0; j--)
+              // {
+              //   //通过c给b赋值
+              //   b = (c % 2 == 0) ? GPIO_PIN_RESET : GPIO_PIN_SET;
+              //   c/=2;
+                
+              //   //计算要写入的引脚编号
+              //   pin = GPIO_PIN_7 >> j;
+
+              //   //写入b的值到对应引脚上
+              //   HAL_GPIO_WritePin(GPIOF, pin, b);
+              //   //二进制编码正确
+              //   // if(b == GPIO_PIN_SET)
+              //   //   printf("1");
+              //   // else
+              //   //   printf("0");
+              // }
+              
+              // printf("\n\nnow a : %d...  time : %ld\n\n", a, HAL_GetTick());
+
+              //ready置1
+              HAL_GPIO_WritePin(GPIOF, GPIO_PIN_8, GPIO_PIN_SET);
+              // printf("ready = 1... \n");
 
 
+              //等待读到ack=1信号(传输完成)
+              while(HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_9) == GPIO_PIN_RESET);
+              //ack=1
+              // printf("ack = 1... \n");
+              //返回ready = 0
+              HAL_GPIO_WritePin(GPIOF, GPIO_PIN_8, GPIO_PIN_RESET);
+
+              // printf("ready = 0...\n");
+
+              while(HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_9) == GPIO_PIN_SET);
+              // printf("ack = 0...\n");
+              
+            }
+          }
+          long int end = HAL_GetTick();
+
+          printf("counting over... %ld\n\n", end);
+
+          long int once = end - start;
+
+          
+
+          // double v = once*1.0/1000;
+          // v = 255/v;
+          // printf("v = %f\n\n", v);
+          // printf("v = 255/[(%ld-%ld)/1000] = %f\n\nb/s", end, start, v);
 
 
-        // uint16_t pin = GPIO_PIN_0;
-        // int a = 0b0;
-        // for(i = 0; i < 7; i++)
-        // {
-        //   pin = GPIO_PIN_0 << i;
-        //   HAL_GPIO_WritePin(GPIOF, pin, HAL_GPIO_ReadPin(GPIOC, pin));   
-
-        //   // if(HAL_GPIO_ReadPin(GPIOC, pin) == GPIO_PIN_SET)
-        //   //   printf("1");
-        //   // else
-        //   //   printf("0");
-        // }
-        // printf("\n\n = %d... Time : %ld\n\n", HAL_GetTick());
+          printf("time = %ld\n\n", once);
+          count = 0;      
+        }
       }
-      else//未进行速率运算
+      else
       {
-        //control led
-        HAL_GPIO_WritePin(GPIOF, GPIO_PIN_0, HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0));
-        HAL_GPIO_WritePin(GPIOF, GPIO_PIN_1, HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1));
-        HAL_GPIO_WritePin(GPIOF, GPIO_PIN_2, HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_2));
-        HAL_GPIO_WritePin(GPIOF, GPIO_PIN_3, HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_3));
+        HAL_GPIO_WritePin(GPIOF, GPIO_PIN_11, GPIO_PIN_RESET);
       }
 
 
 
 
-      // printf("getting message... \n");
+
+      if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_7) != last_state)
+        break;
+      else
+      {
+        // printf("not ready... \n");
+        last_state = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_7);
+      }
+      if(exti == 1)
+      {
+        //中断传递置1
+        HAL_GPIO_WritePin(GPIOF, GPIO_PIN_10, GPIO_PIN_SET);
+        break;
+      }
+      //PC0 1 2 3读取开关状态并传递给PF 0123 , PF连接get的PC, 从而控制get的PF去控制led
+      HAL_GPIO_WritePin(GPIOF, GPIO_PIN_0, HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0));
+      HAL_GPIO_WritePin(GPIOF, GPIO_PIN_1, HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1));
+      HAL_GPIO_WritePin(GPIOF, GPIO_PIN_2, HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_2));
+      HAL_GPIO_WritePin(GPIOF, GPIO_PIN_3, HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_3));
+      
+    }
+
+    if(exti == 0)
+    {
+      // printf("sw8 open... \n");
+
+      //ready置1
+      HAL_GPIO_WritePin(GPIOF, GPIO_PIN_8, GPIO_PIN_SET);
+
+      printf("ready = 1... \n");
+      //等待读到ack=1信号(传输完成)
+      while(HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_9) == GPIO_PIN_RESET);
+      //ack=1
+      printf("ack = 1... \n");
+      //返回ready = 0
+      HAL_GPIO_WritePin(GPIOF, GPIO_PIN_8, GPIO_PIN_RESET);
+
+      printf("ready = 0...\n");
+
+      while(HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_9) == GPIO_PIN_SET);
+      printf("ack = 0...\n");
+
+    }
+    else
+    {
+      
+      //中断传递置0
+      HAL_GPIO_WritePin(GPIOF, GPIO_PIN_10, GPIO_PIN_RESET);
+      printf("break over... \n");
+    }
 
 
-      //发送ack=1信号回去
-      HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_SET);
-      // printf("connected... \nset ack back...\n");
+    /* USER CODE END WHILE */
 
-      //输出时间
-      // printf("send over... %ld\n\n", HAL_GetTick());
-
-
-
-
-      //读到ready = 0时
-      while(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_8) == GPIO_PIN_SET);
-      // printf("get ready = 0... \n");
-      // set ack 0;
-      HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_RESET);
-
-      // printf("set ack 0 and send back... \n");
-      //关闭led8表示未进行传输
-      HAL_GPIO_WritePin(GPIOF, GPIO_PIN_7, GPIO_PIN_RESET);
-      // i = 0;//继续执行主程序
-    //}
-
+    /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
 }
@@ -319,27 +411,45 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOF_CLK_ENABLE(); 
   __HAL_RCC_GPIOC_CLK_ENABLE(); 
 
-  /*Configure GPIO pins output pf: PF0 PF1 4567*/
-  GPIO_Initure.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_3 
-  | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7;  /* all led*/
+  /*Configure GPIO pins output : PF0123 8 10(中断) 11(算速率)*/
+  GPIO_Initure.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 |
+   GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7 |
+   GPIO_PIN_8 | GPIO_PIN_10 | GPIO_PIN_11;
   GPIO_Initure.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_Initure.Pull = GPIO_NOPULL;
   GPIO_Initure.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOF, &GPIO_Initure);
+  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_8, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_10, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_11, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins input pc : PC0 1 2 3 8 */
-  GPIO_Initure.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_8;
+  /*Configure GPIO pins input : PF9 */
+  GPIO_Initure.Pin = GPIO_PIN_9;
+  GPIO_Initure.Mode = GPIO_MODE_INPUT;
+  GPIO_Initure.Pull = GPIO_NOPULL;
+  GPIO_Initure.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOF, &GPIO_Initure);
+
+  
+
+  /*Configure GPIO pins : PC01234567 8   all sw */
+  GPIO_Initure.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3
+   | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7;  /* all sw */
   GPIO_Initure.Mode = GPIO_MODE_INPUT;
   GPIO_Initure.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_Initure);
 
-  /*Configure GPIO pins output pc : PC9(查询ack) */
-  GPIO_Initure.Pin = GPIO_PIN_9;
-  GPIO_Initure.Mode = GPIO_MODE_OUTPUT_PP;
+  /*Configure GPIO pin : PC8中断通信, PC11计算通信速率 */
+  GPIO_Initure.Pin = GPIO_PIN_8 | GPIO_PIN_11;   /* key1_n && key2_n*/
+  GPIO_Initure.Mode = GPIO_MODE_IT_RISING;
   GPIO_Initure.Pull = GPIO_NOPULL;
-  GPIO_Initure.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_Initure);
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_RESET);
+
+  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 4, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 }
 

@@ -340,6 +340,18 @@ static void MX_GPIO_Init(void)
   GPIO_Initure.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_Initure);
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_RESET);
+  
+
+  //ÖÐ¶ÏÅäÖÃ(PF10 --> PC10)
+
+  /*Configure GPIO pin : PC10 */
+  GPIO_Initure.Pin = GPIO_PIN_10;   /* key1_n */
+  GPIO_Initure.Mode = GPIO_MODE_IT_RISING;
+  GPIO_Initure.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOC, &GPIO_Initure);
+
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 }
 

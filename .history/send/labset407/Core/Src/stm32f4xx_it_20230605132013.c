@@ -256,6 +256,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 /* USER CODE BEGIN 1 */
 
+void EXTI9_5_IRQHandler(void)
+{
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_8);
+}
 
 void EXTI15_10_IRQHandler(void)
 {
@@ -268,6 +272,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
     switch(GPIO_Pin)
     {
+        case GPIO_PIN_8:
+          printf("EXTI... %ld\n", HAL_GetTick());
+          exti = 1;
+          break;
         case GPIO_PIN_11:
           count = 1;
           printf("EXTI11...\n");

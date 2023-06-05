@@ -59,8 +59,7 @@
 extern UART_HandleTypeDef huart1;
 extern TIM_HandleTypeDef htim6;
 /* USER CODE BEGIN EV */
-extern int exti;
-extern int count;
+extern int i_flash;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -256,22 +255,37 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 /* USER CODE BEGIN 1 */
 
-
 void EXTI15_10_IRQHandler(void)
 {
-  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_11);
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_10);
+  // HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_11);
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-    int i, j, k;
+    int i;
 
     switch(GPIO_Pin)
     {
-        case GPIO_PIN_11:
-          count = 1;
-          printf("EXTI11...\n");
+        case GPIO_PIN_10:
+          //control led
+          HAL_GPIO_WritePin(GPIOF, GPIO_PIN_0, HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0));
+          HAL_GPIO_WritePin(GPIOF, GPIO_PIN_1, HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1));
+          HAL_GPIO_WritePin(GPIOF, GPIO_PIN_2, HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_2));
+          HAL_GPIO_WritePin(GPIOF, GPIO_PIN_3, HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_3));
           break;
+        // case GPIO_PIN_11:
+        //   printf("getting numbers...%ld \n", HAL_GetTick());
+        //   uint16_t pin = GPIO_PIN_0;
+        //   int a = 0b0;
+        //   for(i = 0; i < 8; i++)
+        //   {
+        //     pin = GPIO_PIN_0 << i;
+        //     HAL_GPIO_WritePin(GPIOF, pin, HAL_GPIO_ReadPin(GPIOC, pin));   
+        //     a += (HAL_GPIO_ReadPin(GPIOC, pin) == GPIO_PIN_SET) ? 1 : 0;
+        //     a = a << 1;
+        //   }
+        //   printf("a = %d... Time : %ld\n\n", a, HAL_GetTick());
     }
 }
 
