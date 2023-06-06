@@ -178,20 +178,20 @@ int main(void)
 
               //ready置1
               HAL_GPIO_WritePin(GPIOF, GPIO_PIN_8, GPIO_PIN_SET);
-              // printf("ready = 1... \n");
+              printf("ready = 1... \n");
 
 
               //等待读到ack=1信号(传输完成)
               while(HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_9) == GPIO_PIN_RESET);
               //ack=1
-              // printf("ack = 1... \n");
+              printf("ack = 1... \n");
               //返回ready = 0
               HAL_GPIO_WritePin(GPIOF, GPIO_PIN_8, GPIO_PIN_RESET);
 
-              // printf("ready = 0...\n");
+              printf("ready = 0...\n");
 
               while(HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_9) == GPIO_PIN_SET);
-              // printf("ack = 0...\n");
+              printf("ack = 0...\n");
               
             }
           }
