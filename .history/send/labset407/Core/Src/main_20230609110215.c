@@ -139,16 +139,19 @@ int main(void)
         {
           // counting...
           int a = 0b0000000;
-          int i = 0, j = 0;
+          int i = 0, j = 0, k = 0;
+          int c;
+          GPIO_PinState b = GPIO_PIN_RESET;
           uint16_t pin = GPIO_PIN_0;
           long int start = HAL_GetTick();
           printf("sending numbers... %ld\n\n", start);
-          for(i = 0; i < 7874; i++)
+          for(k = 0; k < 7874; k++)
           {
             a = 0b0000000;
-            for(j = 0; j < 127; j++)
+            for(i = 0; i < 127; i++)
             {
               a += 1;
+              c = a;
 
               // 将 a 的低7位写入 GPIOF 的 ODR 寄存器
               GPIOF->ODR = (GPIOF->ODR & 0xFF80) | (a & 0x7F);
